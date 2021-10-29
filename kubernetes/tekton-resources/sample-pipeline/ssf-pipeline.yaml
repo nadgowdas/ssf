@@ -68,6 +68,17 @@ spec:
     - build-and-push-image
     taskRef:
       name: grype-vulnerability-scan
+  - name: kube-linter-deployment-scan
+    params:
+    - name: pathToYamlFile
+      value: $(params.pathToYamlFile)
+    runAfter:
+    - vulnerability-scan
+    taskRef:
+      name: kubelinter-deployment-scan
+    workspaces:
+    - name: git-source
+      workspace: git-source
   - name: deploy-to-cluster
     params:
     - name: pathToYamlFile
@@ -79,7 +90,7 @@ spec:
     - name: imageDigest
       value: $(tasks.build-and-push-image.results.IMAGE-DIGEST)
     runAfter:
-    - vulnerability-scan
+    - kube-linter-deployment-scan
     taskRef:
       name: deploy-using-kubectl
     workspaces:
